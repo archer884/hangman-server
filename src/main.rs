@@ -1,6 +1,7 @@
 #![feature(box_syntax, custom_derive, plugin, question_mark)]
 #![plugin(serde_macros)]
 
+#[macro_use] extern crate clap;
 #[macro_use] extern crate router;
 extern crate iron;
 extern crate persistent;
@@ -13,6 +14,7 @@ mod error;
 mod game;
 mod handler;
 mod model;
+mod options;
 mod outcome;
 mod ranking;
 mod request;
@@ -24,7 +26,7 @@ fn main() {
     use iron::prelude::*;
     use persistent::{Read, Write};
     use words::WordList;
-        
+
     let mut chain = Chain::new(router! {
         get "/:token" => handler::check,
         post "/:token/:letter" => handler::guess,
@@ -41,23 +43,24 @@ fn word_list() -> Vec<String> {
     use std::ascii::AsciiExt;
     use std::fs::File;
     use std::io::{BufRead, BufReader};
-    use ranking::{CommonalityRanker, Ranker};
+    use options::Options;
     use stopwatch::Stopwatch;
-    
-    println!("Reading word list");    
+
+    let options = Options::read();
+
+    println!("Reading word list");
+
     let time = Stopwatch::start_new();
-    let word_list = match std::env::args().nth(1).and_then(|path| File::open(&path).ok()) {
+    let word_list = match options.path().and_then(|path| File::open(&path).ok()) {
         None => vec![],
         Some(file) => BufReader::new(file).lines()
             .filter_map(|line| line.map(|line| line.trim().to_ascii_lowercase()).ok())
             .filter(|word| words::validate_word(word))
             .collect()
     };
-    
-    let ranker = CommonalityRanker::new(&word_list);
-    let mut ranked_word_list: Vec<_> = word_list.iter().map(|word| (word, ranker.score_word(word))).collect();
-    ranked_word_list.sort_by(|&(_, a), &(_, b)| a.cmp(&b));
-    
+
+    let word_list = words::select_by_difficulty(options.difficulty(), word_list);
+
     println!("Word list loaded in {}ms", time.elapsed_ms());
-    ranked_word_list.iter().take(word_list.len() / 3).map(|&(word, _)| word.to_owned()).collect()
+    word_list
 }
