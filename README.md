@@ -19,3 +19,6 @@ The current implementation also makes shorter words more valuable than longer wo
     Won: justly (Strikes: 5)
     Correct word: jato
     Correct word: minx
+    
+## Update 2
+This update allows you to have the server start in easy, normal, or hard modes. Easy mode just inverts the ranking strategy used with hard mode, resulting in longer words with more commonly found letters.
