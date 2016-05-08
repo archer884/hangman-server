@@ -29,10 +29,10 @@ fn main() {
         get "/:token" => handler::check,
         post "/:token/:letter" => handler::guess,
     });
-    
+
     chain.link(Write::<GameStore>::both(HashMap::new()));
     chain.link(Read::<WordList>::both(word_list()));
-    
+
     Iron::new(chain).http("localhost:1337").unwrap();
 }
 

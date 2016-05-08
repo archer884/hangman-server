@@ -14,10 +14,10 @@ pub fn check(req: &mut Request) -> IronResult<Response> {
 
     let mut games = mutex.lock().expect("unable to lock mutex");
     let game = games.entry(token).or_insert_with(|| Game::new(select_word(req)));
-    
+
     if game.outcome() != Outcome::InProgress {
         *game = Game::new(select_word(req));
-    }    
+    }
 
     Ok(create_response(&game.check()))
 }
@@ -26,20 +26,20 @@ pub fn guess(req: &mut Request) -> IronResult<Response> {
     let token = req.token()?.to_owned();
     let guess = req.guess()?;
     let mutex = req.get::<Write<GameStore>>().expect("gamestore not found");
-    
+
     let mut games = mutex.lock().expect("unable to lock mutex");
     let mut game = games.entry(token).or_insert_with(|| Game::new(select_word(req)));
-    
+
     if game.outcome() != Outcome::InProgress {
         *game = Game::new(select_word(req));
     }
-    
+
     Ok(create_response(&game.guess(&guess)))
 }
 
 fn create_response<T: Serialize>(model: &T) -> Response {
     use iron::headers::ContentType;
-    
+
     let mut response = Response::with((
         status::Ok,
         serialize(model).unwrap(),

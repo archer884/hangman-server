@@ -40,16 +40,17 @@ impl Game {
             strike_count: 0,
         }
     }
-    
+
     pub fn check(&self) -> GameStateModel {
         GameStateModel {
             success: None,
             outcome: self.outcome(),
             state: self.build_state_string(),
             strike_count: self.strike_count,
+            correct_word: None,
         }
     }
-    
+
     pub fn guess(&mut self, guess: &str) -> GameStateModel {
         match guess.chars().nth(0) {
             None => GameStateModel {
@@ -60,6 +61,11 @@ impl Game {
                     self.strike_count
                 },
                 outcome: self.outcome(),
+                correct_word: if self.outcome() == Outcome::Lost {
+                    Some(self.word.to_owned())
+                } else {
+                    None,
+                }
             },
             Some(guess) => {
                 let success = self.word.chars().any(|c| c == guess);
@@ -73,12 +79,17 @@ impl Game {
                         }
                         self.strike_count
                     },
-                    outcome: self.outcome(),                    
+                    outcome: self.outcome(),
+                    correct_word: if self.outcome() == Outcome::Lost {
+                        Some(self.word.to_owned())
+                    } else {
+                        None,
+                    }
                 }
             }
         }
     }
-    
+
     fn build_state_string(&self) -> String {
         self.word.chars().map(|c| if self.guesses.contains(&c) {
             c
@@ -86,16 +97,16 @@ impl Game {
             '_'
         }).collect()
     }
-    
+
     pub fn outcome(&self) -> Outcome {
         if self.strike_count > 5 {
             return Outcome::Lost
         }
-        
+
         if self.word == self.build_state_string() {
             return Outcome::Won
         }
-        
+
         Outcome::InProgress
     }
 }

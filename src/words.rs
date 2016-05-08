@@ -10,7 +10,7 @@ impl Key for WordList {
 
 pub fn validate_word(s: &str) -> bool {
     s.is_ascii()
-    && s.len() > 3 
+    && s.len() > 3
     && s.len() < 8
     && letters_are_unique(s)
 }
