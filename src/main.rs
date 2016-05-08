@@ -12,6 +12,7 @@ mod error;
 mod game;
 mod handler;
 mod model;
+mod outcome;
 mod request;
 mod words;
 

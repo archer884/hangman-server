@@ -1,30 +1,7 @@
 use std::collections::{HashMap, BTreeSet};
 use iron::typemap::Key;
 use model::GameStateModel;
-use serde::ser::{Serialize, Serializer};
-
-#[derive(Eq, PartialEq)]
-pub enum Outcome {
-    InProgress,
-    Lost,
-    Won,
-}
-
-impl AsRef<str> for Outcome {
-    fn as_ref(&self) -> &str {
-        match *self {
-            Outcome::InProgress => "InProgress",
-            Outcome::Lost => "Lost",
-            Outcome::Won => "Won",
-        }
-    }
-}
-
-impl Serialize for Outcome {
-    fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.serialize_str(self.as_ref())
-    }
-}
+use outcome::Outcome;
 
 pub struct Game {
     word: String,
@@ -52,40 +29,26 @@ impl Game {
     }
 
     pub fn guess(&mut self, guess: &str) -> GameStateModel {
-        match guess.chars().nth(0) {
-            None => GameStateModel {
-                success: Some(false),
-                state: self.build_state_string(),
-                strike_count: {
-                    self.strike_count += 1;
-                    self.strike_count
-                },
-                outcome: self.outcome(),
-                correct_word: if self.outcome() == Outcome::Lost {
-                    Some(self.word.to_owned())
-                } else {
-                    None
-                }
-            },
-            Some(guess) => {
-                let success = self.word.chars().any(|c| c == guess);
-                self.guesses.insert(guess);
-                GameStateModel {
-                    success: Some(success),
-                    state: self.build_state_string(),
-                    strike_count: {
-                        if !success {
-                            self.strike_count += 1;
-                        }
-                        self.strike_count
-                    },
-                    outcome: self.outcome(),
-                    correct_word: if self.outcome() == Outcome::Lost {
-                        Some(self.word.to_owned())
-                    } else {
-                        None
-                    }
-                }
+        let guess = guess.chars().nth(0).unwrap_or(0 as char);
+        let success = self.word.chars().any(|c| guess == c);
+
+        self.guesses.insert(guess);
+        self.strike_count += if success {
+            0
+        } else {
+            1
+        };
+
+        let outcome = self.outcome();
+
+        GameStateModel {
+            success: Some(success),
+            state: self.build_state_string(),
+            strike_count: self.strike_count,
+            outcome: outcome,
+            correct_word: match outcome {
+                Outcome::Lost => Some(self.word.to_owned()),
+                _ => None,
             }
         }
     }

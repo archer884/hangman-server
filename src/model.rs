@@ -1,4 +1,4 @@
-use game::Outcome;
+use outcome::Outcome;
 
 #[derive(Serialize)]
 pub struct GameStateModel {

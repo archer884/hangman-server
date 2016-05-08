@@ -1,6 +1,7 @@
-use game::{Game, GameStore, Outcome};
+use game::{Game, GameStore};
 use iron::prelude::*;
 use iron::status;
+use outcome::Outcome;
 use persistent::{Read, Write};
 use rand::{Rng, thread_rng};
 use request::Data;
