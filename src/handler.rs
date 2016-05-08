@@ -5,6 +5,7 @@ use persistent::{Read, Write};
 use rand::{Rng, thread_rng};
 use request::Data;
 use words::WordList;
+use serde::ser::Serialize;
 use serde_json::to_string as serialize;
 
 pub fn check(req: &mut Request) -> IronResult<Response> {
@@ -18,10 +19,7 @@ pub fn check(req: &mut Request) -> IronResult<Response> {
         *game = Game::new(select_word(req));
     }    
 
-    Ok(Response::with((
-        status::Ok,
-        serialize(&game.check()).unwrap()
-    )))
+    Ok(create_response(&game.check()))
 }
 
 pub fn guess(req: &mut Request) -> IronResult<Response> {
@@ -36,10 +34,18 @@ pub fn guess(req: &mut Request) -> IronResult<Response> {
         *game = Game::new(select_word(req));
     }
     
-    Ok(Response::with((
+    Ok(create_response(&game.guess(&guess)))
+}
+
+fn create_response<T: Serialize>(model: &T) -> Response {
+    use iron::headers::ContentType;
+    
+    let mut response = Response::with((
         status::Ok,
-        serialize(&game.guess(&guess)).unwrap()
-    )))
+        serialize(model).unwrap(),
+    ));
+    response.headers.set(ContentType::json());
+    response
 }
 
 fn select_word(req: &mut Request) -> String {
