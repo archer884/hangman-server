@@ -1,6 +1,6 @@
 use std::ascii::AsciiExt;
-use std::collections::BTreeSet;
 use iron::typemap::Key;
+use strsim::levenshtein;
 
 pub struct WordList;
 
@@ -8,14 +8,10 @@ impl Key for WordList {
     type Value = Vec<String>;
 }
 
-pub fn validate_word(s: &str) -> bool {
-    s.is_ascii()
-    && s.len() > 3
-    && s.len() < 8
-    && letters_are_unique(s)
+pub fn rank_word<'a, T: AsRef<str>>(word: &str, word_list: &'a [T]) -> i32 {
+    word_list.iter().filter(|witness| levenshtein(witness.as_ref(), word) < 3).count() as i32
 }
 
-fn letters_are_unique(s: &str) -> bool {
-    let set: BTreeSet<char> = s.chars().collect();
-    set.len() == s.len()
+pub fn validate_word(s: &str) -> bool {
+    s.is_ascii() && s.len() > 3 && s.len() < 9
 }
