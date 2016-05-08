@@ -5,6 +5,7 @@
 extern crate iron;
 extern crate persistent;
 extern crate rand;
+extern crate serde;
 extern crate serde_json;
 
 mod error;
