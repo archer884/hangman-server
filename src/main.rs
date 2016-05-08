@@ -15,6 +15,7 @@ mod model;
 mod request;
 mod words;
 
+use std::ascii::AsciiExt;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -39,7 +40,7 @@ fn word_list() -> Vec<String> {
     match std::env::args().nth(1).and_then(|path| File::open(&path).ok()) {
         None => vec![],
         Some(file) => BufReader::new(file).lines()
-            .filter_map(|line| line.map(|line| line.trim().to_owned()).ok())
+            .filter_map(|line| line.map(|line| line.trim().to_ascii_lowercase()).ok())
             .filter(|word| words::validate_word(word))
             .collect()
     }
