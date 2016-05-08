@@ -32,8 +32,6 @@ impl Ranker for CommonalityRanker {
     fn score_word(&self, word: &str) -> i32 {
         use std::ops::Add;
 
-        word.chars().map(|c| 
-            self.scores.get(&c).map(|&score| score).unwrap_or(0)
-        ).fold(0, Add::add)
+        word.chars().map(|c| self.scores.get(&c).cloned().unwrap_or(0)).fold(0, Add::add)
     }
 }
