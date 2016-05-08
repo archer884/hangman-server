@@ -14,6 +14,7 @@ mod game;
 mod handler;
 mod model;
 mod outcome;
+mod ranking;
 mod request;
 mod words;
 
@@ -40,6 +41,7 @@ fn word_list() -> Vec<String> {
     use std::ascii::AsciiExt;
     use std::fs::File;
     use std::io::{BufRead, BufReader};
+    use ranking::{CommonalityRanker, Ranker};
     use stopwatch::Stopwatch;
     
     println!("Reading word list");    
@@ -51,6 +53,11 @@ fn word_list() -> Vec<String> {
             .filter(|word| words::validate_word(word))
             .collect()
     };
+    
+    let ranker = CommonalityRanker::new(&word_list);
+    let mut ranked_word_list: Vec<_> = word_list.iter().map(|word| (word, ranker.score_word(word))).collect();
+    ranked_word_list.sort_by(|&(_, a), &(_, b)| a.cmp(&b));
+    
     println!("Word list loaded in {}ms", time.elapsed_ms());
-    word_list
+    ranked_word_list.iter().take(word_list.len() / 3).map(|&(word, _)| word.to_owned()).collect()
 }
