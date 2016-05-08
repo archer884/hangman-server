@@ -7,6 +7,7 @@ use iron::status;
 pub enum ApplicationError {
     MissingToken,
     MissingLetter,
+    InvalidGuess,
 }
 
 impl fmt::Display for ApplicationError {
@@ -20,6 +21,7 @@ impl Error for ApplicationError {
         match *self {
             ApplicationError::MissingToken => "Missing required token",
             ApplicationError::MissingLetter => "Missing required letter",
+            ApplicationError::InvalidGuess => "Guesses must be ascii",
         }
     }
 }

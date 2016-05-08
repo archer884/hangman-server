@@ -24,7 +24,7 @@ pub fn check(req: &mut Request) -> IronResult<Response> {
 
 pub fn guess(req: &mut Request) -> IronResult<Response> {
     let token = req.token()?.to_owned();
-    let guess = req.guess()?.to_owned();
+    let guess = req.guess()?;
     let mutex = req.get::<Write<GameStore>>().expect("gamestore not found");
     
     let mut games = mutex.lock().expect("unable to lock mutex");
