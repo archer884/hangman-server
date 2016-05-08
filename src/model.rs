@@ -1,35 +1,16 @@
 use game::Outcome;
 
 #[derive(Serialize)]
-pub struct CheckModel {
-    #[serde(rename = "State")]
-    pub state: String,
-    
-    #[serde(rename = "Outcome")]
-    pub outcome: Outcome,
-    
-    #[serde(rename = "Guesses")]
-    #[serde(skip_serializing_if="Vec::is_empty")]
-    pub guesses: Vec<char>,
-    
-    #[serde(rename = "StrikeCount")]
-    pub strike_count: i32,
-}
-
-#[derive(Serialize)]
-pub struct GuessModel {
+pub struct GameStateModel {
     #[serde(rename = "Success")]
-    pub success: bool,
-    
-    #[serde(rename = "Outcome")]
-    pub outcome: Outcome,
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub success: Option<bool>,
     
     #[serde(rename = "State")]
     pub state: String,
     
-    #[serde(rename = "Guesses")]
-    #[serde(skip_serializing_if="Vec::is_empty")]
-    pub guesses: Vec<char>,
+    #[serde(rename = "Outcome")]
+    pub outcome: Outcome,
     
     #[serde(rename = "StrikeCount")]
     pub strike_count: i32,
