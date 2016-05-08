@@ -64,7 +64,7 @@ impl Game {
                 correct_word: if self.outcome() == Outcome::Lost {
                     Some(self.word.to_owned())
                 } else {
-                    None,
+                    None
                 }
             },
             Some(guess) => {
@@ -83,7 +83,7 @@ impl Game {
                     correct_word: if self.outcome() == Outcome::Lost {
                         Some(self.word.to_owned())
                     } else {
-                        None,
+                        None
                     }
                 }
             }

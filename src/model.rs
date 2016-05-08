@@ -17,5 +17,5 @@ pub struct GameStateModel {
 
     #[serde(rename = "CorrectWord")]
     #[serde(skip_serializing_if="Option::is_none")]
-    pub correct_word: Option<String>;
+    pub correct_word: Option<String>,
 }
