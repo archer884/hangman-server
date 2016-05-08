@@ -3,9 +3,7 @@ use iron::prelude::*;
 use iron::status;
 use outcome::Outcome;
 use persistent::{Read, Write};
-use rand::{Rng, thread_rng};
 use request::Data;
-use words::WordList;
 use serde::ser::Serialize;
 use serde_json::to_string as serialize;
 
@@ -50,6 +48,9 @@ fn create_response<T: Serialize>(model: &T) -> Response {
 }
 
 fn select_word(req: &mut Request) -> String {
+    use rand::{Rng, thread_rng};
+    use words::WordList;
+    
     let word_list = req.get::<Read<WordList>>().expect("wordlist not found");
     thread_rng().choose(&word_list).map_or("apple".to_owned(), |word| word.to_owned())
 }
