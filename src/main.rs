@@ -7,6 +7,7 @@ extern crate persistent;
 extern crate rand;
 extern crate serde;
 extern crate serde_json;
+extern crate stopwatch;
 
 mod error;
 mod game;
@@ -16,16 +17,13 @@ mod outcome;
 mod request;
 mod words;
 
-use std::ascii::AsciiExt;
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-use game::GameStore;
-use iron::prelude::*;
-use persistent::{Read, Write};
-use words::WordList;
-
 fn main() {
+    use std::collections::HashMap;
+    use game::GameStore;
+    use iron::prelude::*;
+    use persistent::{Read, Write};
+    use words::WordList;
+        
     let mut chain = Chain::new(router! {
         get "/:token" => handler::check,
         post "/:token/:letter" => handler::guess,
@@ -34,15 +32,25 @@ fn main() {
     chain.link(Write::<GameStore>::both(HashMap::new()));
     chain.link(Read::<WordList>::both(word_list()));
 
+    println!("Serving requests");
     Iron::new(chain).http("localhost:1337").unwrap();
 }
 
 fn word_list() -> Vec<String> {
-    match std::env::args().nth(1).and_then(|path| File::open(&path).ok()) {
+    use std::ascii::AsciiExt;
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
+    use stopwatch::Stopwatch;
+    
+    println!("Reading word list");    
+    let time = Stopwatch::start_new();
+    let word_list = match std::env::args().nth(1).and_then(|path| File::open(&path).ok()) {
         None => vec![],
         Some(file) => BufReader::new(file).lines()
             .filter_map(|line| line.map(|line| line.trim().to_ascii_lowercase()).ok())
             .filter(|word| words::validate_word(word))
             .collect()
-    }
+    };
+    println!("Word list loaded in {}ms", time.elapsed_ms());
+    word_list
 }
