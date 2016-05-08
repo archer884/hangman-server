@@ -40,6 +40,7 @@ fn word_list() -> Vec<String> {
         None => vec![],
         Some(file) => BufReader::new(file).lines()
             .filter_map(|line| line.map(|line| line.trim().to_owned()).ok())
+            .filter(|word| words::validate_word(word))
             .collect()
     }
 }
