@@ -16,7 +16,6 @@ mod handler;
 mod model;
 mod options;
 mod outcome;
-mod ranking;
 mod request;
 mod words;
 
@@ -40,9 +39,8 @@ fn main() {
 }
 
 fn word_list() -> Vec<String> {
-    use std::ascii::AsciiExt;
     use std::fs::File;
-    use std::io::{BufRead, BufReader};
+    use std::io::BufReader;
     use options::Options;
     use stopwatch::Stopwatch;
 
@@ -53,16 +51,8 @@ fn word_list() -> Vec<String> {
     let time = Stopwatch::start_new();
     let word_list = match options.path().and_then(|path| File::open(&path).ok()) {
         None => vec![],
-        Some(file) => BufReader::new(file).lines()
-            .filter_map(|line| match line {
-                Ok(ref line) if line.is_ascii() => Some(line.trim().to_ascii_lowercase()),
-                _ => None,
-            })
-            .filter(|word| words::validate_word(word))
-            .collect()
+        Some(file) => words::create_word_list(&mut BufReader::new(file), options.difficulty()),
     };
-
-    let word_list = words::select_by_difficulty(options.difficulty(), word_list);
 
     println!("Word list loaded in {}ms", time.elapsed_ms());
     word_list
