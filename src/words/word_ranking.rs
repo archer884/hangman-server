@@ -35,3 +35,26 @@ impl Ranker for CommonalityRanker {
         word.chars().map(|c| self.scores.get(&c).cloned().unwrap_or(0)).fold(0, Add::add)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{CommonalityRanker, Ranker};
+    
+    #[test]
+    fn longer_words_are_easier() {
+        let ranker = get_ranker();
+        
+        assert!(ranker.score_word("aaaaa") > ranker.score_word("aaaa"));
+    }
+    
+    #[test]
+    fn words_with_more_common_letters_are_easier() {
+        let ranker = get_ranker();
+        
+        assert!(ranker.score_word("aaa") > ranker.score_word("bbb"));
+    }
+    
+    fn get_ranker() -> CommonalityRanker {
+        CommonalityRanker::new(&["aaab", "aaab", "aaab"])
+    }
+}
