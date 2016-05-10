@@ -54,7 +54,10 @@ fn word_list() -> Vec<String> {
     let word_list = match options.path().and_then(|path| File::open(&path).ok()) {
         None => vec![],
         Some(file) => BufReader::new(file).lines()
-            .filter_map(|line| line.map(|line| line.trim().to_ascii_lowercase()).ok())
+            .filter_map(|line| match line {
+                Ok(ref line) if line.is_ascii() => Some(line.trim().to_ascii_lowercase()),
+                _ => None,
+            })
             .filter(|word| words::validate_word(word))
             .collect()
     };

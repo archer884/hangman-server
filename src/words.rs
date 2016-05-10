@@ -1,4 +1,3 @@
-use std::ascii::AsciiExt;
 use std::collections::BTreeSet;
 use std::cmp::Ordering;
 use iron::typemap::Key;
@@ -29,8 +28,7 @@ fn select<F: Fn(i32, i32) -> Ordering>(word_list: Vec<String>, cmp: F) -> Vec<St
 }
 
 pub fn validate_word(s: &str) -> bool {
-    s.is_ascii()
-    && s.len() > 3
+    s.len() > 3
     && s.len() < 8
     && letters_are_unique(s)
 }
