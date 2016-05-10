@@ -7,3 +7,6 @@ os:
 script:
     - cargo build -v
     - cargo test -v
+branches:
+    only: 
+        - master
