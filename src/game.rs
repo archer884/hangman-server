@@ -3,6 +3,7 @@ use iron::typemap::Key;
 use model::GameStateModel;
 use outcome::Outcome;
 
+#[derive(Serialize, Deserialize)]
 pub struct Game {
     word: String,
     guesses: BTreeSet<char>,
