@@ -6,32 +6,44 @@ use options::Difficulty;
 pub struct WordList;
 
 impl Key for WordList {
-    type Value = Vec<String>;
+    type Value = WordService;
 }
 
-pub fn create_word_list<R: BufRead>(reader: &mut R, difficulty: Difficulty) -> Vec<String> {
-    use std::ascii::AsciiExt;
-    
-    let word_list = reader.lines()
-        .filter_map(|line| match line {
-            Ok(ref line) if line.is_ascii() => Some(line.trim().to_ascii_lowercase()),
-            _ => None,
-        })
-        .filter(|word| validate_word(word))
-        .collect();
-    
-    select_by_difficulty(difficulty, word_list)
+pub struct WordService {
+    easy: Vec<String>,
+    normal: Vec<String>,
+    hard: Vec<String>,
 }
 
-fn select_by_difficulty(difficulty: Difficulty, word_list: Vec<String>) -> Vec<String> {
-    match difficulty {
-        Difficulty::Normal => word_list,
-        Difficulty::Easy => select(word_list, |a, b| b.cmp(&a)),
-        Difficulty::Hard => select(word_list, |a, b| a.cmp(&b)),
+impl WordService {
+    pub fn create<R: BufRead>(reader: &mut R) -> WordService {
+        use std::ascii::AsciiExt;
+        
+        let words: Vec<_> = reader.lines()
+            .filter_map(|line| match line {
+                Ok(ref line) if line.is_ascii() => Some(line.trim().to_ascii_lowercase()),
+                _ => None,
+            })
+            .filter(|word| validate_word(word))
+            .collect();
+            
+        WordService {
+            easy: select(&words, |a, b| b.cmp(&a)),
+            hard: select(&words, |a, b| a.cmp(&b)),
+            normal: words,
+        }
+    }
+    
+    pub fn empty() -> WordService {
+        WordService {
+            easy: vec![],
+            normal: vec![],
+            hard: vec![],
+        }
     }
 }
 
-fn select<F: Fn(i32, i32) -> Ordering>(word_list: Vec<String>, cmp: F) -> Vec<String> {
+fn select<F: Fn(i32, i32) -> Ordering>(word_list: &[String], cmp: F) -> Vec<String> {
     use words::{CommonalityRanker, Ranker};
     
     let ranker = CommonalityRanker::new(&word_list);

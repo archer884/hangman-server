@@ -1,6 +1,5 @@
 use std::collections::{HashMap, BTreeSet};
 use iron::typemap::Key;
-use model::GameStateModel;
 use outcome::Outcome;
 
 pub struct Game {

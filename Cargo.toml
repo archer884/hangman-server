@@ -6,6 +6,7 @@ authors = ["J/A <archer884@gmail.com>"]
 [dependencies]
 clap = { version = "*", features = ["unstable", "suggestions", "color"] }
 clippy = "*"
+hangman-data = {git = "https://github.com/archer884/hangman-data"}
 iron = "*"
 persistent = "*"
 rand = "*"

@@ -3,6 +3,7 @@
 
 #[macro_use] extern crate clap;
 #[macro_use] extern crate router;
+extern crate hangman_data;
 extern crate iron;
 extern crate persistent;
 extern crate rand;
@@ -27,18 +28,22 @@ fn main() {
     use words::WordList;
 
     let mut chain = Chain::new(router! {
-        get "/:token" => handler::check,
-        post "/:token/:letter" => handler::guess,
+        post "/api/v1/tokens/create" => handler::create_token,
+        get "/api/v1/tokens/:token" => handler::record,
+        post "/api/v1/games/create" => handler::create_game,
+        post "/api/v1/games/:id" => handler::guess,
+        get "/api/v1/games/:id" => handler::game_status,
+        get "/api/v1/games/:token/:page" => handler::page_games, 
     });
 
     chain.link(Write::<GameStore>::both(HashMap::new()));
-    chain.link(Read::<WordList>::both(word_list()));
+    chain.link(Read::<WordList>::both(get_word_service()));
 
     println!("Serving requests");
     Iron::new(chain).http("localhost:1337").unwrap();
 }
 
-fn word_list() -> Vec<String> {
+fn get_word_service() -> words::WordService {
     use std::fs::File;
     use std::io::BufReader;
     use options::Options;
@@ -50,8 +55,8 @@ fn word_list() -> Vec<String> {
 
     let time = Stopwatch::start_new();
     let word_list = match options.path().and_then(|path| File::open(&path).ok()) {
-        None => vec![],
-        Some(file) => words::create_word_list(&mut BufReader::new(file), options.difficulty()),
+        None => words::WordService::empty(),
+        Some(file) => words::WordService::create(&mut BufReader::new(file)),
     };
 
     println!("Word list loaded in {}ms", time.elapsed_ms());
