@@ -131,13 +131,14 @@ dependencies = [
 [[package]]
 name = "hangman-data"
 version = "0.1.0"
-source = "git+https://github.com/archer884/hangman-data#faa89f9e1c5f3bfcbcd24695c0dd444e94810faa"
+source = "git+https://github.com/archer884/hangman-data#98bd12ecbb3c0862b7b5bffde61e4c8eb0762150"
 dependencies = [
  "dotenv 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dotenv_macros 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "postgres 0.11.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2_postgres 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 0.7.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

@@ -1,13 +1,30 @@
 use std::fmt;
 use std::error::Error;
+use hangman_data::service::ServiceError;
 use iron::prelude::*;
 use iron::status;
 
 #[derive(Debug)]
 pub enum ApplicationError {
-    MissingToken,
-    MissingLetter,
-    InvalidGuess,
+    UrlParam { name: String, message: String },
+    Deserialization { message: String, inner: String },
+    Db(Box<Error + Send>),
+}
+
+impl ApplicationError {
+    pub fn url_param<T: Into<String>>(name: T, message: T) -> ApplicationError {
+        ApplicationError::UrlParam {
+            name: name.into(),
+            message: message.into(),
+        }
+    }
+
+    pub fn deserialization<T: Into<String>>(message: T, inner: T) -> ApplicationError {
+        ApplicationError::Deserialization {
+            message: message.into(),
+            inner: inner.into(),
+        }
+    }
 }
 
 impl fmt::Display for ApplicationError {
@@ -19,9 +36,8 @@ impl fmt::Display for ApplicationError {
 impl Error for ApplicationError {
     fn description(&self) -> &str {
         match *self {
-            ApplicationError::MissingToken => "Missing required token",
-            ApplicationError::MissingLetter => "Missing required letter",
-            ApplicationError::InvalidGuess => "Guesses must be ascii",
+            ApplicationError::UrlParam { .. } => "Bad or missing url parameter",
+            ApplicationError::Deserialization { .. } => "Unable to deserialize payload",
         }
     }
 }
@@ -32,5 +48,11 @@ impl From<ApplicationError> for IronError {
             response: Response::with((status::BadRequest, error.description())),
             error: box error,
         }
+    }
+}
+
+impl From<ServiceError> for ApplicationError {
+    fn from(error: ServiceError) -> ApplicationError {
+        ApplicationError::Db(box error)
     }
 }

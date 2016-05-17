@@ -1,14 +1,30 @@
-use game::{Game, GameStore};
+use data::Db;
+use hangman_data::service::{ConnectionService, GameService, TokenService};
 use iron::prelude::*;
 use iron::status;
-use outcome::Outcome;
 use persistent::{Read, Write};
-use request::Data;
+use request::RequestData;
+use request::model::CreateTokenRequest;
 use serde::ser::Serialize;
 use serde_json::to_string as serialize;
 
 pub fn create_token(req: &mut Request) -> IronResult<Response> {
-    unimplemented!()
+    let request = req.body::<CreateTokenRequest>()?;
+    let mutex = req.get::<Write<Db>>().expect("Db not found");
+    let mut db = mutex.lock().expect("unable to lock mutex");
+
+    db.tokens().create(&request)?;
+
+    // fn create_response<T: Serialize>(model: &T) -> Response {
+//     use iron::headers::ContentType;
+
+//     let mut response = Response::with((
+//         status::Ok,
+//         serialize(model).unwrap(),
+//     ));
+//     response.headers.set(ContentType::json());
+//     response
+// }
 }
 
 pub fn record(req: &mut Request) -> IronResult<Response> {
@@ -74,7 +90,7 @@ pub fn page_games(req: &mut Request) -> IronResult<Response> {
 // fn select_word(req: &mut Request) -> String {
 //     use rand::{Rng, thread_rng};
 //     use words::WordList;
-    
+
 //     let word_list = req.get::<Read<WordList>>().expect("wordlist not found");
 //     word_list.choose().map_or("apple".to_owned(), |word| word.to_owned())
 // }

@@ -11,18 +11,16 @@ extern crate serde;
 extern crate serde_json;
 extern crate stopwatch;
 
+mod data;
 mod error;
-mod game;
 mod handler;
-mod model;
 mod options;
-mod outcome;
 mod request;
 mod words;
 
 fn main() {
-    use std::collections::HashMap;
-    use game::GameStore;
+    use data::Db;
+    use hangman_data::service::PgConnectionService;
     use iron::prelude::*;
     use persistent::{Read, Write};
     use words::WordList;
@@ -36,7 +34,7 @@ fn main() {
         get "/api/v1/games/:token/:page" => handler::page_games, 
     });
 
-    chain.link(Write::<GameStore>::both(HashMap::new()));
+    chain.link(Write::<Db>::both(PgConnectionService::new()));
     chain.link(Read::<WordList>::both(get_word_service()));
 
     println!("Serving requests");
