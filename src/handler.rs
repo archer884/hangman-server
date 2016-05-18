@@ -1,10 +1,13 @@
 use data::Db;
+use error::ApplicationError;
 use hangman_data::service::{ConnectionService, GameService, TokenService};
 use iron::prelude::*;
 use iron::status;
-use persistent::{Read, Write};
+use iron::status::Status;
+use persistent::Write;
 use request::RequestData;
-use request::model::CreateTokenRequest;
+use request::model::*;
+use response::model::*;
 use serde::ser::Serialize;
 use serde_json::to_string as serialize;
 
@@ -13,22 +16,27 @@ pub fn create_token(req: &mut Request) -> IronResult<Response> {
     let mutex = req.get::<Write<Db>>().expect("Db not found");
     let mut db = mutex.lock().expect("unable to lock mutex");
 
-    db.tokens().create(&request)?;
-
-    // fn create_response<T: Serialize>(model: &T) -> Response {
-//     use iron::headers::ContentType;
-
-//     let mut response = Response::with((
-//         status::Ok,
-//         serialize(model).unwrap(),
-//     ));
-//     response.headers.set(ContentType::json());
-//     response
-// }
+    match db.tokens().create(&request) {
+        Err(_) => build_response(
+            &GenericResponse::failure("token not added"),
+            status::Conflict,
+        ),
+        Ok(_) => build_response(
+            &GenericResponse::success("token added"),
+            status::Ok,
+        ),
+    }
 }
 
 pub fn record(req: &mut Request) -> IronResult<Response> {
-    unimplemented!()
+    let request = req.body::<TokenRecordRequest>()?;
+    let mutex = req.get::<Write<Db>>().expect("Db not found");
+    let mut db = mutex.lock().expect("unable to lock mutex");
+    
+    match db.tokens().record(request.token()) {
+        Err(e) => Err(ApplicationError::Db(box e).into()),
+        Ok(ref record) => build_response(&TokenRecordResponse::from_record(record), status::Ok),
+    }
 }
 
 pub fn create_game(req: &mut Request) -> IronResult<Response> {
@@ -45,6 +53,14 @@ pub fn game_status(req: &mut Request) -> IronResult<Response> {
 
 pub fn page_games(req: &mut Request) -> IronResult<Response> {
     unimplemented!()
+}
+
+fn build_response<T: Serialize>(model: &T, status: Status) -> IronResult<Response> {
+    use iron::headers::ContentType;
+
+    let mut response = Response::with((status, serialize(model).unwrap()));
+    response.headers.set(ContentType::json());
+    Ok(response)
 }
 
 // pub fn check(req: &mut Request) -> IronResult<Response> {

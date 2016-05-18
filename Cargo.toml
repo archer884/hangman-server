@@ -5,8 +5,9 @@ authors = ["J/A <archer884@gmail.com>"]
 
 [dependencies]
 clap = { version = "*", features = ["unstable", "suggestions", "color"] }
-clippy = "*"
-hangman-data = {git = "https://github.com/archer884/hangman-data"}
+#clippy = "*"
+hangman-data = { git = "https://github.com/archer884/hangman-data" }
+#hangman-data = { path = "C:/Users/JA/src/hangman/hangman-data", branch = "make-serviceerror-send" }
 iron = "*"
 persistent = "*"
 rand = "*"

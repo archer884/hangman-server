@@ -16,6 +16,7 @@ mod error;
 mod handler;
 mod options;
 mod request;
+mod response;
 mod words;
 
 fn main() {

@@ -38,6 +38,7 @@ impl Error for ApplicationError {
         match *self {
             ApplicationError::UrlParam { .. } => "Bad or missing url parameter",
             ApplicationError::Deserialization { .. } => "Unable to deserialize payload",
+            ApplicationError::Db(_) => "Database error",
         }
     }
 }
